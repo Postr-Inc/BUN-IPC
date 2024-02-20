@@ -1,5 +1,10 @@
 import { WebSocketServer } from "ws";
 import WebSocket from "ws";
+if(process.env.isExternProcess){
+    process.cwd = () => {
+        return process.env.PWD 
+    }
+}
 /**
  * @class IPC
  * @description Inter-Process Communication - allows you to communicate with vaderjs using Bun.js
@@ -137,8 +142,7 @@ class IPC {
     const client = new WebSocket(`ws://localhost:${config.port}`);
 
     client.on("open", () => {
-      client.send(JSON.stringify({ SERVERINIT: true, IPC_TYPE: proto })); 
-      console.log('sent')
+      client.send(JSON.stringify({ SERVERINIT: true, IPC_TYPE: proto }));  
     });
     client.on("message", (msg) => {
       if (msg.ESTABLISHED && msg.IPC_TYPE === proto) {
@@ -230,7 +234,7 @@ class IPC {
   /**
    * @method client
    * @description Creates a new IPC client instance
-   * @param {string} config 
+   * @param {Object} config 
    * @returns 
    */
 
@@ -239,9 +243,7 @@ class IPC {
       this.spawnServer();
     }
     const ws = new WebSocket(`ws://localhost:${config.port}`);
-    ws.on("open", () => {
-      console.log(config);
-    });
+     
     ws.send(JSON.stringify({ CLIENTINIT: true, IPC_TYPE: config.use, port: config.port }));
 
     function listen(callback) {
